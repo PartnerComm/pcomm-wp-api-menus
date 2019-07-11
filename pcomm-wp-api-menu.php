@@ -64,7 +64,6 @@ class PartnerComm_WP_API_Menu
     {
         $args = [];
         $menu_items = wp_get_nav_menu_items($menu, $args);
-        error_log(json_encode($menu_items));
         if (!$menu_items) {
             return false;
         }
@@ -163,3 +162,15 @@ class PartnerComm_WP_API_Menu
 }
 
 new PartnerComm_WP_API_Menu();
+
+/**
+ * Provides themes with a function to output a JSON menu by name
+*/
+if (!function_exists('pcomm_wp_api_menu_by_name')) {
+    function pcomm_wp_api_menu_by_name($name) {
+        $PartnerComm_WP_API_Menu = new PartnerComm_WP_API_Menu();
+        $menu = $PartnerComm_WP_API_Menu->menu_by_name($name);
+        return htmlspecialchars(json_encode($menu), ENT_QUOTES, 'UTF-8');
+    }
+}
+
