@@ -3,7 +3,7 @@
 Plugin Name: PartnerComm WP API Menu
 Plugin URI: http://www.partnercomm.net
 Description: This plugin adds json menu endpoints at <code>/wp-json/wp/v2/menus</code>, <code>/wp-json/wp/v2/menus/{menu}</code>, <code>/wp-json/wp/v2/menus/theme-locations/</code> and <code>/wp-json/wp/v2/menus/theme-locations/{location}</code>.
-Version: 1.0.0
+Version: 1.0.1
 Author: PartnerComm, Inc.
 Author URI: http://www.partnercomm.net
 */
@@ -130,7 +130,24 @@ class PartnerComm_WP_API_Menu
             : false;
     }
 
-    function return_locations($request)
+    function return_locations($request, $location = false)
+    {
+        $menus = $this->menu_locations();
+
+        $parameters = $request->get_params();
+        if ($parameters && $parameters['location']) {
+            $location = $parameters['location'];
+            $menus = !empty($menus[$location])
+                ? $menus[$location]
+                : ['message' => "$location is not a valid menu location."];
+        }
+
+        $response = new WP_REST_Response($menus);
+        $response->set_status(200);
+        return $response;
+    }
+
+    function menu_locations()
     {
         $locations = get_nav_menu_locations();
 
@@ -143,33 +160,33 @@ class PartnerComm_WP_API_Menu
             }
         }
 
-        $parameters = $request->get_params();
-        if ($parameters && $parameters['location']) {
-            $location = $parameters['location'];
-            if (empty($menus[$location])) {
-                $response = new WP_REST_Response(['message' => "$location is not a valid menu location."]);
-                $response->set_status(200);
-                return $response;
-            }
-            $menus = $menus[$location];
-        }
-
-        $response = new WP_REST_Response($menus);
-        $response->set_status(200);
-        return $response;
+        return $menus;
     }
-
 }
 
 new PartnerComm_WP_API_Menu();
 
 /**
  * Provides themes with a function to output a JSON menu by name
-*/
+ */
 if (!function_exists('pcomm_wp_api_menu_by_name')) {
-    function pcomm_wp_api_menu_by_name($name) {
+    function pcomm_wp_api_menu_by_name($name)
+    {
         $PartnerComm_WP_API_Menu = new PartnerComm_WP_API_Menu();
         $menu = $PartnerComm_WP_API_Menu->menu_by_name($name);
+        return htmlspecialchars(json_encode($menu), ENT_QUOTES, 'UTF-8');
+    }
+}
+
+/**
+ * Provides themes with a function to output a JSON menu by location
+ */
+if (!function_exists('pcomm_wp_api_menu_by_location')) {
+    function pcomm_wp_api_menu_by_location($location)
+    {
+        $PartnerComm_WP_API_Menu = new PartnerComm_WP_API_Menu();
+        $menus = $PartnerComm_WP_API_Menu->menu_locations();
+        $menu = isset($menus[$location]) ? $menus[$location] : false;
         return htmlspecialchars(json_encode($menu), ENT_QUOTES, 'UTF-8');
     }
 }

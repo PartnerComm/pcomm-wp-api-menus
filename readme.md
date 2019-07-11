@@ -40,5 +40,23 @@ ___
 `wp-json/wp/v2/menus/theme-locations/{location}` 
 ___
 
+## Theme Use
+To output a menu in the theme, for PHP rendering in a component, we've created the following helper functions.
+
+#### Get menu by name
+```
+if (function_exists('pcomm_wp_api_menu_by_name')): 
+    echo pcomm_wp_api_menu_by_name('primary-navigation'); 
+endif;
+```
+
+#### Get menu by location
+```
+if (function_exists('pcomm_wp_api_menu_by_location')): 
+    echo pcomm_wp_api_menu_by_location('primary'); 
+endif;
+```
+
 ## Release Notes
+* 1.0.1 : adds theme helper functions for outputting specific menus
 * 1.0.0 : initial commit and release
