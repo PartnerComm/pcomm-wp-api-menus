@@ -3,7 +3,7 @@
 Plugin Name: PartnerComm WP API Menu
 Plugin URI: http://www.partnercomm.net
 Description: This plugin adds json menu endpoints at <code>/wp-json/wp/v2/menus</code>, <code>/wp-json/wp/v2/menus/{menu}</code>, <code>/wp-json/wp/v2/menus/theme-locations/</code> and <code>/wp-json/wp/v2/menus/theme-locations/{location}</code>.
-Version: 1.0.1
+Version: 1.0.2
 Author: PartnerComm, Inc.
 Author URI: http://www.partnercomm.net
 */
@@ -101,6 +101,7 @@ class PartnerComm_WP_API_Menu
                     'rel' => $m->xfn ?: false,
                     'title' => $m->title,
                     'url' => $m->url,
+                    'parsedUrl' => parse_url($m->url),
                 ];
             },
             $menu);
