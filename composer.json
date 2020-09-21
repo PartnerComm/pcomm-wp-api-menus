@@ -1,6 +1,6 @@
 {
   "name": "pcomm/pcomm-wp-api-menus",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This WordPress plugin in creates an API to access menus within the WordPress JSON API.",
   "type": "wordpress-plugin",
   "authors": [

@@ -58,5 +58,6 @@ endif;
 ```
 
 ## Release Notes
+* 1.0.3 : adds permission_callback to endpoint
 * 1.0.1 : adds theme helper functions for outputting specific menus
 * 1.0.0 : initial commit and release

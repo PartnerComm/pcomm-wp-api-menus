@@ -3,7 +3,7 @@
 Plugin Name: PartnerComm WP API Menu
 Plugin URI: http://www.partnercomm.net
 Description: This plugin adds json menu endpoints at <code>/wp-json/wp/v2/menus</code>, <code>/wp-json/wp/v2/menus/{menu}</code>, <code>/wp-json/wp/v2/menus/theme-locations/</code> and <code>/wp-json/wp/v2/menus/theme-locations/{location}</code>.
-Version: 1.0.2
+Version: 1.0.3
 Author: PartnerComm, Inc.
 Author URI: http://www.partnercomm.net
 */
@@ -20,20 +20,28 @@ class PartnerComm_WP_API_Menu
         register_rest_route('wp/v2', '/menus', array(
             'methods' => 'GET',
             'callback' => [$this, 'menus'],
+			'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/theme-locations', array(
             'methods' => 'GET',
             'callback' => [$this, 'return_locations'],
+			'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/(?P<menu>[a-zA-Z0-9-_]+)', array(
             'methods' => 'GET',
             'callback' => [$this, 'menus'],
+			'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/theme-locations/(?P<location>[a-zA-Z0-9-_]+)', array(
             'methods' => 'GET',
             'callback' => [$this, 'return_locations'],
+			'permission_callback' => [$this, 'permission_callback']
         ));
     }
+
+    function permission_callback() {
+    	return true;
+	}
 
     function menus($request)
     {
