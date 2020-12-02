@@ -58,6 +58,7 @@ endif;
 ```
 
 ## Release Notes
+* 1.0.5 : menu item children should be an array, not an object
 * 1.0.4 : add menu item properties slugs (array), slug (string)
 * 1.0.3 : adds permission_callback to endpoint
 * 1.0.1 : adds theme helper functions for outputting specific menus

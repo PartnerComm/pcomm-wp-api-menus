@@ -139,9 +139,9 @@ class PartnerComm_WP_API_Menu
                 $sub_menu[] = $m;
             }
         }
-        return $sub_menu && $sub_menu[0]
-            ? (object)$sub_menu
-            : false;
+		return !empty($sub_menu)
+			? $sub_menu
+			: false;
     }
 
     function return_locations($request, $location = false)
