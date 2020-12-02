@@ -3,7 +3,7 @@
 Plugin Name: PartnerComm WP API Menu
 Plugin URI: http://www.partnercomm.net
 Description: This plugin adds json menu endpoints at <code>/wp-json/wp/v2/menus</code>, <code>/wp-json/wp/v2/menus/{menu}</code>, <code>/wp-json/wp/v2/menus/theme-locations/</code> and <code>/wp-json/wp/v2/menus/theme-locations/{location}</code>.
-Version: 1.0.3
+Version: 1.0.4
 Author: PartnerComm, Inc.
 Author URI: http://www.partnercomm.net
 */
@@ -95,25 +95,30 @@ class PartnerComm_WP_API_Menu
         return $new_menu;
     }
 
-    function filter_menu($menu)
-    {
-        return (object)array_map(
-            function ($m) {
-                return [
-                    'id' => (int)$m->ID,
-                    'attr_title' => $m->attr_title ?: false,
-                    'classes' => $this->filter_menu_classes($m->classes),
-                    'description' => $m->description ?: false,
-                    'target' => $m->target ?: false,
-                    'parent' => (int)$m->menu_item_parent,
-                    'rel' => $m->xfn ?: false,
-                    'title' => $m->title,
-                    'url' => $m->url,
-                    'parsedUrl' => parse_url($m->url),
-                ];
-            },
-            $menu);
-    }
+	function filter_menu($menu)
+	{
+		return (object)array_map(
+			function ($m) {
+				$parsedUrl = parse_url($m->url);
+				$slugs = explode('/', trim($parsedUrl['path'], '/'));
+				$slug = !empty($slugs) ? $slugs[count($slugs) - 1] : false;
+				return [
+					'id' => (int)$m->ID,
+					'attr_title' => $m->attr_title ?: false,
+					'classes' => $this->filter_menu_classes($m->classes),
+					'description' => $m->description ?: false,
+					'parent' => (int)$m->menu_item_parent,
+					'parsedUrl' => $parsedUrl,
+					'rel' => $m->xfn ?: false,
+					'slugs' => $slugs,
+					'slug' => $slug,
+					'target' => $m->target ?: false,
+					'title' => $m->title,
+					'url' => $m->url,
+				];
+			},
+			$menu);
+	}
 
     function filter_menu_classes($classes)
     {
