@@ -3,7 +3,7 @@
 Plugin Name: PartnerComm WP API Menu
 Plugin URI: http://www.partnercomm.net
 Description: This plugin adds json menu endpoints at <code>/wp-json/wp/v2/menus</code>, <code>/wp-json/wp/v2/menus/{menu}</code>, <code>/wp-json/wp/v2/menus/theme-locations/</code> and <code>/wp-json/wp/v2/menus/theme-locations/{location}</code>.
-Version: 1.0.6
+Version: 1.0.7
 Author: PartnerComm, Inc.
 Author URI: http://www.partnercomm.net
 */
@@ -15,35 +15,36 @@ class PartnerComm_WP_API_Menu
         add_action('rest_api_init', [$this, 'route']);
     }
 
-    function route()
+    public function route()
     {
         register_rest_route('wp/v2', '/menus', array(
             'methods' => 'GET',
             'callback' => [$this, 'menus'],
-			'permission_callback' => [$this, 'permission_callback']
+            'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/theme-locations', array(
             'methods' => 'GET',
             'callback' => [$this, 'return_locations'],
-			'permission_callback' => [$this, 'permission_callback']
+            'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/(?P<menu>[a-zA-Z0-9-_]+)', array(
             'methods' => 'GET',
             'callback' => [$this, 'menus'],
-			'permission_callback' => [$this, 'permission_callback']
+            'permission_callback' => [$this, 'permission_callback']
         ));
         register_rest_route('wp/v2', '/menus/theme-locations/(?P<location>[a-zA-Z0-9-_]+)', array(
             'methods' => 'GET',
             'callback' => [$this, 'return_locations'],
-			'permission_callback' => [$this, 'permission_callback']
+            'permission_callback' => [$this, 'permission_callback']
         ));
     }
 
-    function permission_callback() {
-    	return true;
-	}
+    public function permission_callback()
+    {
+        return true;
+    }
 
-    function menus($request)
+    public function menus($request)
     {
         $menu_names = get_terms('nav_menu');
         $menus = [];
@@ -68,7 +69,7 @@ class PartnerComm_WP_API_Menu
         return $response;
     }
 
-    function menu_by_name($menu = 'primary-navigation')
+    public function menu_by_name($menu = 'primary-navigation')
     {
         $args = [];
         $menu_items = wp_get_nav_menu_items($menu, $args);
@@ -78,7 +79,7 @@ class PartnerComm_WP_API_Menu
         return $this->menu($menu_items);
     }
 
-    function menu($menu)
+    public function menu($menu)
     {
         $menu_items = $this->filter_menu($menu);
 
@@ -92,41 +93,47 @@ class PartnerComm_WP_API_Menu
             $m->children = $this->menu_children($menu_items, $m->id);
             $new_menu[] = $m;
         }
-		return array_values($new_menu);
+        return array_values($new_menu);
     }
 
-	function filter_menu($menu)
-	{
-		return (object)array_map(
-			function ($m) {
-				$parsedUrl = parse_url($m->url);
-				$slugs = explode('/', trim($parsedUrl['path'], '/'));
-				$slug = !empty($slugs) ? $slugs[count($slugs) - 1] : false;
-				return [
-					'id' => (int)$m->ID,
-					'attr_title' => $m->attr_title ?: false,
-					'classes' => $this->filter_menu_classes($m->classes),
-					'description' => $m->description ?: false,
-					'parent' => (int)$m->menu_item_parent,
-					'parsedUrl' => $parsedUrl,
-					'rel' => $m->xfn ?: false,
-					'slugs' => $slugs,
-					'slug' => $slug,
-					'target' => $m->target ?: false,
-					'title' => $m->title,
-					'url' => $m->url,
-				];
-			},
-			$menu);
-	}
+    public function filter_menu($menu)
+    {
+        return (object)array_map(
+            function ($m) {
+                $parsedUrl = parse_url($m->url);
+                if(isset($parsedUrl['path'])) {
+                    $slugs = explode('/', trim($parsedUrl['path'], '/'));
+                } else {
+                    $slugs = [];
+                }
+                $slug = !empty($slugs) ? $slugs[count($slugs) - 1] : false;
+                return [
+                    'id' => (int)$m->ID,
+                    'attr_title' => $m->attr_title ?: false,
+                    'classes' => $this->filter_menu_classes($m->classes),
+                    'description' => $m->description ?: false,
+                    'parent' => (int)$m->menu_item_parent,
+                    'parsedUrl' => $parsedUrl,
+                    'rel' => $m->xfn ?: false,
+                    'slugs' => $slugs,
+                    'slug' => $slug,
+                    'target' => $m->target ?: false,
+                    'title' => $m->title,
+                    'url' => $m->url,
+                    'properties' => unserialize(get_post_meta($m->ID, '_menu_item_qf_properties', true))
+                ];
+            },
+            $menu
+        );
+    }
 
-    function filter_menu_classes($classes)
+    public function filter_menu_classes($classes)
     {
         $classes = implode(' ', $classes);
         return empty($classes) ? false : $classes;
     }
 
-    function menu_children($menu, $id)
+    public function menu_children($menu, $id)
     {
         $sub_menu = [];
         foreach ($menu as $m) {
@@ -139,12 +146,12 @@ class PartnerComm_WP_API_Menu
                 $sub_menu[] = $m;
             }
         }
-		return !empty($sub_menu)
-			? $sub_menu
-			: false;
+        return !empty($sub_menu)
+            ? $sub_menu
+            : false;
     }
 
-    function return_locations($request, $location = false)
+    public function return_locations($request, $location = false)
     {
         $menus = $this->menu_locations();
 
@@ -161,7 +168,7 @@ class PartnerComm_WP_API_Menu
         return $response;
     }
 
-    function menu_locations()
+    public function menu_locations()
     {
         $locations = get_nav_menu_locations();
 
@@ -204,4 +211,3 @@ if (!function_exists('pcomm_wp_api_menu_by_location')) {
         return htmlspecialchars(json_encode($menu), ENT_QUOTES, 'UTF-8');
     }
 }
-
